@@ -17,34 +17,21 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef IActsTrackRecoAlg_h
+#define IActsTrackRecoAlg_h
 
-// GAUDI
-#include <Gaudi/Property.h>
-#include <GaudiAlg/GaudiAlgorithm.h>
-#include <GaudiKernel/ToolHandle.h>
+#include <GaudiKernel/IAlgTool.h>
 
-// Acts
-#include <Acts/Geometry/TrackingGeometry.hpp>
+namespace Acts {
+  class TrackingGeometry;
+}
 
-#include "IActsTrackRecoAlg.h"
-
-class ActsAlg : public GaudiAlgorithm {
+class GAUDI_API IActsTrackRecoAlg : virtual public IAlgTool {
 public:
-  explicit ActsAlg(const std::string&, ISvcLocator*);
+  DeclareInterfaceID(IActsTrackRecoAlg, 1, 0);
 
-  virtual ~ActsAlg();
-  /// Initialize.
-  /// @return status code
-  virtual StatusCode initialize() final;
-  /// Execute.
-  /// @return status code
-  virtual StatusCode execute() final;
-  /// Finalize.
-  /// @return status code
-  virtual StatusCode finalize() final;
-
-private:
-  const Acts::TrackingGeometry* tracking_geom_{nullptr};
-  ToolHandle<IActsTrackRecoAlg> algo_;
+  virtual void       setTrackingGeometry(const Acts::TrackingGeometry*) = 0;
+  virtual StatusCode run() const                                        = 0;
 };
+
+#endif

@@ -31,11 +31,11 @@ namespace {
     dd4hep::rec::SurfaceList const& detSL   = ds.surfaceList();
     int                             counter = 0;
     for (dd4hep::rec::ISurface* surf : detSL) {
-      dd4hep::Volume volume     = ((dd4hep::rec::Surface*)surf)->volume();
-      auto*          ddsurf     = ((dd4hep::rec::Surface*)surf);
-      auto const     volumeName = std::string(volume->GetName());
+      auto* ddsurf = dynamic_cast<dd4hep::rec::Surface*>(surf);
       if (not ddsurf->detElement().isValid())
         continue;
+      const dd4hep::Volume& volume     = ddsurf->volume();
+      const std::string     volumeName = volume->GetName();
 
       dd4hep::BitFieldCoder* cellIDcoder = nullptr;
       if (ddsurf->type().isSensitive() and not ddsurf->type().isHelper()) {
@@ -50,13 +50,12 @@ namespace {
           printout(PrintLevel::INFO, LOG_SOURCE, "Not readout for detector %s", detectorName.c_str());
           continue;
         }
-      } else {
+      } else
         continue;
-      }
       counter++;
 
-      std::string path        = ddsurf->detElement().path();
-      auto        layerNumber = cellIDcoder->get(ddsurf->id(), "layer");
+      const std::string path        = ddsurf->detElement().path();
+      auto              layerNumber = cellIDcoder->get(ddsurf->id(), "layer");
       printout(PrintLevel::INFO, LOG_SOURCE, "Found Surface at %s in layer %d at radius %3.2f mm", path.c_str(),
                layerNumber, ddsurf->origin().rho());
 

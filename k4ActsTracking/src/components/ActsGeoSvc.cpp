@@ -17,18 +17,19 @@
  * limitations under the License.
  */
 
+#include <DD4hep/Printout.h>
+#include <GaudiKernel/Service.h>
+#include <k4Interface/IGeoSvc.h>
+
+#include <Acts/Geometry/TrackingGeometry.hpp>
+#include <Acts/MagneticField/MagneticFieldContext.hpp>
+#include <Acts/Plugins/DD4hep/ConvertDD4hepDetector.hpp>
+#include <Acts/Surfaces/PlaneSurface.hpp>
+#include <Acts/Utilities/Logger.hpp>
+#include <Acts/Visualization/GeometryView3D.hpp>
+#include <Acts/Visualization/ObjVisualization3D.hpp>
+
 #include "ActsGeoSvc.h"
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/MagneticField/MagneticFieldContext.hpp"
-#include "Acts/Plugins/DD4hep/ConvertDD4hepDetector.hpp"
-#include "Acts/Surfaces/PlaneSurface.hpp"
-#include "Acts/Utilities/Logger.hpp"
-#include "Acts/Visualization/GeometryView3D.hpp"
-#include "Acts/Visualization/ObjVisualization3D.hpp"
-#include "DD4hep/Printout.h"
-#include "GaudiKernel/Service.h"
-#include "TGeoManager.h"
-#include "k4Interface/IGeoSvc.h"
 
 using namespace Gaudi;
 
@@ -62,9 +63,8 @@ StatusCode ActsGeoSvc::initialize() {
     if (createGeoObj().isFailure()) {
       m_log << MSG::ERROR << "Could not create geometry OBJ" << endmsg;
       return StatusCode::FAILURE;
-    } else {
+    } else
       m_log << MSG::INFO << "Geometry OBJ SUCCESSFULLY created" << endmsg;
-    }
   } else {
     m_log << MSG::VERBOSE << "Geometry debugging is OFF." << endmsg;
     return StatusCode::SUCCESS;

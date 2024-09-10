@@ -20,21 +20,18 @@
 #ifndef ACTSGEOSVC_H
 #define ACTSGEOSVC_H
 
+#include <DD4hep/Detector.h>
+#include <DDRec/Surface.h>
+#include <DDRec/SurfaceManager.h>
+#include <GaudiKernel/MsgStream.h>
+#include <GaudiKernel/Service.h>
+
+#include <Acts/Geometry/GeometryContext.hpp>
+#include <Acts/Geometry/TrackingGeometry.hpp>
 #include <Acts/Material/IMaterialDecorator.hpp>
-#include "Acts/Definitions/Common.hpp"
-#include "Acts/Definitions/Units.hpp"
-#include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Plugins/DD4hep/DD4hepDetectorElement.hpp"
-#include "Acts/Surfaces/Surface.hpp"
-#include "Acts/Utilities/Logger.hpp"
-#include "DD4hep/DD4hepUnits.h"
-#include "DD4hep/Detector.h"
-#include "DDRec/Surface.h"
-#include "DDRec/SurfaceManager.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/Service.h"
-#include "GaudiKernel/ServiceHandle.h"
+#include <Acts/Surfaces/Surface.hpp>
+#include <Acts/Utilities/Logger.hpp>
+
 #include "IActsGeoSvc.h"
 
 class ActsGeoSvc : public extends<Service, IActsGeoSvc> {
