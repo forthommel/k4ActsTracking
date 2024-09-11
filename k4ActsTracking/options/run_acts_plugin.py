@@ -16,8 +16,9 @@ actsgeosvc.GeoSvcName = geosvc.name()
 actsgeosvc.debugGeometry = True
 actsgeosvc.outputFileName = "MyObjFile"
 
-actsalgo = ActsAlg("MyActsAlg")
-actsalgo.algorithm = 'ActsTrackRecoAlg'
+actsalgo = ActsAlg('ActsAlg')
+actsalgo.trackFindingAlgorithm = 'ActsTrackFindingAlg'
+actsalgo.trackFittingAlgorithm = 'ActsTrackFittingAlg'
 algList.append(actsalgo)
 
 from Configurables import ApplicationMgr

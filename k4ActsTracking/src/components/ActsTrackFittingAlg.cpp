@@ -3,11 +3,11 @@
 
 #include <Acts/Geometry/TrackingGeometry.hpp>
 
-#include "IActsTrackRecoAlg.h"
+#include "IActsTrackFittingAlg.h"
 
-class ActsTrackRecoAlg final : public GaudiTool, virtual public IActsTrackRecoAlg {
+class ActsTrackFittingAlg final : public GaudiTool, virtual public IActsTrackFittingAlg {
 public:
-  explicit ActsTrackRecoAlg(const std::string& type, const std::string& name, const IInterface* parent)
+  explicit ActsTrackFittingAlg(const std::string& type, const std::string& name, const IInterface* parent)
       : GaudiTool(type, name, parent) {}
 
   inline StatusCode initialize() override {
@@ -28,4 +28,4 @@ private:
   const Acts::TrackingGeometry* tracking_geom_{nullptr};
 };
 
-DECLARE_COMPONENT(ActsTrackRecoAlg)
+DECLARE_COMPONENT(ActsTrackFittingAlg)

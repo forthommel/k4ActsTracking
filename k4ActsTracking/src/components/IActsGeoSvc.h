@@ -17,10 +17,11 @@
  * limitations under the License.
  */
 
-#ifndef IACTSGEOSVC_H
-#define IACTSGEOSVC_H
+#ifndef k4ActsTracking_IActsGeoSvc_h
+#define k4ActsTracking_IActsGeoSvc_h
 
 #include <GaudiKernel/IService.h>
+
 #include <unordered_map>
 
 namespace dd4hep {
@@ -30,20 +31,20 @@ namespace dd4hep {
 }  // namespace dd4hep
 
 namespace Acts {
-  class TrackingGeometry;
+  class MagneticFieldProvider;
   class Surface;
+  class TrackingGeometry;
 }  // namespace Acts
 
 class GAUDI_API IActsGeoSvc : virtual public IService {
 public:
+  DeclareInterfaceID(IActsGeoSvc, 1, 0);
+  virtual ~IActsGeoSvc() = default;
+
   using VolumeSurfaceMap = std::unordered_map<uint64_t, const Acts::Surface*>;
 
-public:
-  DeclareInterfaceID(IActsGeoSvc, 1, 0);
-
-  virtual const Acts::TrackingGeometry& trackingGeometry() const = 0;
-
-  virtual ~IActsGeoSvc() {}
+  virtual const Acts::TrackingGeometry&      trackingGeometry() const = 0;
+  virtual const Acts::MagneticFieldProvider& magneticField() const    = 0;
 };
 
-#endif  // IACTSGEOSVC_H
+#endif

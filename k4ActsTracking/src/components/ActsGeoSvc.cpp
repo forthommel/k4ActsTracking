@@ -24,6 +24,7 @@
 #include <Acts/Geometry/TrackingGeometry.hpp>
 #include <Acts/MagneticField/MagneticFieldContext.hpp>
 #include <Acts/Plugins/DD4hep/ConvertDD4hepDetector.hpp>
+#include <Acts/Plugins/DD4hep/DD4hepFieldAdapter.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <Acts/Utilities/Logger.hpp>
 #include <Acts/Visualization/GeometryView3D.hpp>
@@ -35,14 +36,17 @@ using namespace Gaudi;
 
 DECLARE_COMPONENT(ActsGeoSvc)
 
-ActsGeoSvc::ActsGeoSvc(const std::string& name, ISvcLocator* svc) : base_class(name, svc), m_log(msgSvc(), name) {}
-
-ActsGeoSvc::~ActsGeoSvc(){};
+ActsGeoSvc::ActsGeoSvc(const std::string& name, ISvcLocator* svc)
+    : base_class(name, svc),
+      geo_service_name_{this, "GeoSvcName", "GeoSvc", "The name of the GeoSvc instance"},
+      debug_geometry_{this, "debugGeometry", false, "Option for geometry debugging"},
+      output_file_name_{this, "outputFileName", "", "Output file name"},
+      log_(msgSvc(), name) {}
 
 StatusCode ActsGeoSvc::initialize() {
-  m_dd4hepGeo = svcLocator()->service<IGeoSvc>(m_geoSvcName)->getDetector();
+  dd4hep_detector_ = svcLocator()->service<IGeoSvc>(geo_service_name_)->getDetector();
   // necessary?
-  // m_dd4hepGeo->addExtension<IActsGeoSvc>(this);
+  // dd4hep_detector_->addExtension<IActsGeoSvc>(this);
 
   Acts::BinningType bTypePhi              = Acts::equidistant;
   Acts::BinningType bTypeR                = Acts::equidistant;
@@ -51,22 +55,23 @@ StatusCode ActsGeoSvc::initialize() {
   double            layerEnvelopeZ        = Acts::UnitConstants::mm;
   double            defaultLayerThickness = Acts::UnitConstants::fm;
   using Acts::sortDetElementsByID;
-  auto logger   = Acts::getDefaultLogger("k4ActsTracking", m_actsLoggingLevel);
-  m_trackingGeo = Acts::convertDD4hepDetector(m_dd4hepGeo->world(), *logger, bTypePhi, bTypeR, bTypeZ, layerEnvelopeR,
-                                              layerEnvelopeZ, defaultLayerThickness, sortDetElementsByID,
-                                              m_trackingGeoCtx, m_materialDeco);
+  auto logger        = Acts::getDefaultLogger("k4ActsTracking", acts_logging_level_);
+  tracking_geometry_ = Acts::convertDD4hepDetector(dd4hep_detector_->world(), *logger, bTypePhi, bTypeR, bTypeZ,
+                                                   layerEnvelopeR, layerEnvelopeZ, defaultLayerThickness,
+                                                   sortDetElementsByID, geometry_context_, material_decorator_);
+  magnetic_field_    = std::make_unique<Acts::DD4hepFieldAdapter>(dd4hep_detector_->field());
 
   /// Setting geometry debug option
-  if (m_debugGeometry == true) {
-    m_log << MSG::INFO << "Geometry debugging is ON." << endmsg;
+  if (debug_geometry_) {
+    log_ << MSG::INFO << "Geometry debugging is ON." << endmsg;
 
     if (createGeoObj().isFailure()) {
-      m_log << MSG::ERROR << "Could not create geometry OBJ" << endmsg;
+      log_ << MSG::ERROR << "Could not create geometry OBJ" << endmsg;
       return StatusCode::FAILURE;
     } else
-      m_log << MSG::INFO << "Geometry OBJ SUCCESSFULLY created" << endmsg;
+      log_ << MSG::INFO << "Geometry OBJ SUCCESSFULLY created" << endmsg;
   } else {
-    m_log << MSG::VERBOSE << "Geometry debugging is OFF." << endmsg;
+    log_ << MSG::VERBOSE << "Geometry debugging is OFF." << endmsg;
     return StatusCode::SUCCESS;
   }
   std::cout << "works!" << std::endl;
@@ -74,28 +79,22 @@ StatusCode ActsGeoSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsGeoSvc::execute() { return StatusCode::SUCCESS; }
-
-StatusCode ActsGeoSvc::finalize() { return StatusCode::SUCCESS; }
-
 /// Create a geometry OBJ file
 StatusCode ActsGeoSvc::createGeoObj() {
   // Convert DD4Hep geometry to acts
+  Acts::ObjVisualization3D object_vis;
 
-  Acts::ObjVisualization3D m_obj;
-
-  if (!m_trackingGeo) {
+  if (!tracking_geometry_)
     return StatusCode::FAILURE;
-  }
-  m_trackingGeo->visitSurfaces([&](const Acts::Surface* surface) {
-    if (surface == nullptr) {
-      info() << "no surface??? " << endmsg;
+  tracking_geometry_->visitSurfaces([&](const Acts::Surface* surface) {
+    if (!surface) {
+      warning() << "no surface???" << endmsg;
       return;
     }
-    Acts::GeometryView3D::drawSurface(m_obj, *surface, m_trackingGeoCtx);
+    Acts::GeometryView3D::drawSurface(object_vis, *surface, geometry_context_);
   });
-  m_obj.write(m_outputFileName);
-  m_log << MSG::INFO << m_outputFileName << " SUCCESSFULLY written." << endmsg;
+  object_vis.write(output_file_name_);
+  log_ << MSG::INFO << output_file_name_ << " SUCCESSFULLY written." << endmsg;
 
   return StatusCode::SUCCESS;
 }

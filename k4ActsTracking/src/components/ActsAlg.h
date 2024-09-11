@@ -17,17 +17,19 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef k4ActsTracking_ActsAlg_h
+#define k4ActsTracking_ActsAlg_h
 
-// GAUDI
 #include <Gaudi/Property.h>
 #include <GaudiAlg/GaudiAlgorithm.h>
 #include <GaudiKernel/ToolHandle.h>
 
-// Acts
+#include <k4FWCore/DataHandle.h>
+
 #include <Acts/Geometry/TrackingGeometry.hpp>
 
-#include "IActsTrackRecoAlg.h"
+#include "IActsTrackFindingAlg.h"
+#include "IActsTrackFittingAlg.h"
 
 class ActsAlg : public GaudiAlgorithm {
 public:
@@ -45,6 +47,11 @@ public:
   virtual StatusCode finalize() final;
 
 private:
-  const Acts::TrackingGeometry* tracking_geom_{nullptr};
-  ToolHandle<IActsTrackRecoAlg> algo_;
+  mutable DataHandle<edm4hep::TrackerHitPlaneCollection> input_hits_;
+
+  const Acts::TrackingGeometry*    tracking_geom_{nullptr};
+  ToolHandle<IActsTrackFindingAlg> finding_algo_;
+  ToolHandle<IActsTrackFittingAlg> fitting_algo_;
 };
+
+#endif

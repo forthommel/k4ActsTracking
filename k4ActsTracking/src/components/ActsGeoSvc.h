@@ -36,54 +36,35 @@
 
 class ActsGeoSvc : public extends<Service, IActsGeoSvc> {
 public:
-  using VolumeSurfaceMap = std::unordered_map<uint64_t, const Acts::Surface*>;
+  explicit ActsGeoSvc(const std::string& name, ISvcLocator* svc);
+  virtual ~ActsGeoSvc() = default;
 
-private:
-  dd4hep::Detector* m_dd4hepGeo = nullptr;
+  StatusCode initialize() override;
 
-  /// DD4hep surface map
-  std::map<int64_t, dd4hep::rec::Surface*> m_surfaceMap;
-
-  /// ACTS Logging Level
-  Acts::Logging::Level m_actsLoggingLevel = Acts::Logging::INFO;
-
-  /// ACTS Tracking Geometry Context
-  Acts::GeometryContext m_trackingGeoCtx;
-
-  /// ACTS Tracking Geometry
-  std::unique_ptr<const Acts::TrackingGeometry> m_trackingGeo{nullptr};
-
-  /// ACTS Material Decorator
-  std::shared_ptr<const Acts::IMaterialDecorator> m_materialDeco{nullptr};
-
-  /// ACTS surface lookup container for hit surfaces that generate smeared hits
-  VolumeSurfaceMap m_surfaces;
-
-  Gaudi::Property<std::string> m_geoSvcName{this, "GeoSvcName", "GeoSvc", "The name of the GeoSvc instance"};
-
-  /// Option for the Debug Geometry
-  Gaudi::Property<bool> m_debugGeometry{this, "debugGeometry", false, "Option for geometry debugging"};
-  /// Output file name
-  Gaudi::Property<std::string> m_outputFileName{this, "outputFileName", "", "Output file name"};
-
-  /// Gaudi logging output
-  MsgStream m_log;
-
-public:
-  ActsGeoSvc(const std::string& name, ISvcLocator* svc);
-
-  virtual ~ActsGeoSvc();
-
-  virtual StatusCode initialize() final;
-
-  virtual StatusCode execute() final;
-
-  virtual StatusCode finalize() final;
+  inline const Acts::TrackingGeometry&      trackingGeometry() const override { return *tracking_geometry_; }
+  inline const Acts::MagneticFieldProvider& magneticField() const override { return *magnetic_field_; }
 
   StatusCode createGeoObj();
 
-  virtual const Acts::TrackingGeometry& trackingGeometry() const;
+  using VolumeSurfaceMap = std::unordered_map<uint64_t, const Acts::Surface*>;
+
+private:
+  Gaudi::Property<std::string> geo_service_name_;
+  Gaudi::Property<bool>        debug_geometry_;    ///< Option for the Debug Geometry
+  Gaudi::Property<std::string> output_file_name_;  ///< Output file name
+
+  dd4hep::Detector*                        dd4hep_detector_{nullptr};
+  std::map<int64_t, dd4hep::rec::Surface*> dd4hep_surfaces_map_;  ///< DD4hep surface map
+
+  std::unique_ptr<const Acts::TrackingGeometry>      tracking_geometry_{nullptr};  ///< ACTS Tracking Geometry
+  std::unique_ptr<const Acts::MagneticFieldProvider> magnetic_field_{nullptr};     ///< ACTS Magnetic field provider
+
+  Acts::GeometryContext geometry_context_;  ///< ACTS Tracking Geometry Context
+  VolumeSurfaceMap      surfaces_map_;  ///< ACTS surface lookup container for hit surfaces that generate smeared hits
+  std::shared_ptr<const Acts::IMaterialDecorator> material_decorator_{nullptr};  ///< ACTS Material Decorator
+
+  MsgStream            log_;                                      ///< Gaudi logging output
+  Acts::Logging::Level acts_logging_level_{Acts::Logging::INFO};  ///< ACTS Logging Level
 };
 
-inline const Acts::TrackingGeometry& ActsGeoSvc::trackingGeometry() const { return *m_trackingGeo; }
 #endif

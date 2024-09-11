@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-#ifndef IActsTrackRecoAlg_h
-#define IActsTrackRecoAlg_h
+#ifndef IActsTrackFittingAlg_h
+#define IActsTrackFittingAlg_h
 
 #include <GaudiKernel/IAlgTool.h>
 
@@ -26,9 +26,9 @@ namespace Acts {
   class TrackingGeometry;
 }
 
-class GAUDI_API IActsTrackRecoAlg : virtual public IAlgTool {
+class GAUDI_API IActsTrackFittingAlg : virtual public IAlgTool {
 public:
-  DeclareInterfaceID(IActsTrackRecoAlg, 1, 0);
+  DeclareInterfaceID(IActsTrackFittingAlg, 1, 0);
 
   virtual void       setTrackingGeometry(const Acts::TrackingGeometry*) = 0;
   virtual StatusCode run() const                                        = 0;
